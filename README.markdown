@@ -4,7 +4,7 @@ Ever found yourself confused and lost as you read through [page](http://wiki.osd
 
 This project will try to be an interactive demonstration that illustrates how each VGA register setting works together to result in the documented video modes. It is also intended that this project can help test the VGA functionality of real vs emulated VGA hardware.
 
-**Status:** Work in progress. See [TODO](#todo) below.
+**Status: WIP.** This project is currently only a dream. See [TODO](#todo) below.
 
 ## Dependencies
 
@@ -27,7 +27,8 @@ node build.js
 This will create three new files in the `build` folder:
 
 - `vga.exe` will be the DOS program, while
-- `hda-vga.img` and `state-vga.bin` are the hard disk image and the emulator state files respectively, allowing you to run the program via the Virtual x86 emulator.
+- `hda-vga.img` will be the hard disk image required to run the program via the Virtual x86 emulator, and
+- `state-vga.bin` will be the emulator state file captured immediately after the DOS program started running.
 
 ## TODO
 
