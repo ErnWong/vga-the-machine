@@ -1,5 +1,11 @@
 {
-  "name": "vga-machine",
+  "name": "vga-the-machine",
   "version": "0.0.0",
+  "author": "Ernest Wong <ewon521@gmail.com> (https://ernwong.github.io/)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ErnWong/vga-the-machine"
+  },
+  "license": "MIT",
   "dependencies": {}
 }
