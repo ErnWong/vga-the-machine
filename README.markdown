@@ -1,6 +1,8 @@
 # VGA The Machine
 
-Interactive demonstration of how VGA works, and a collection of tests for emulator writers.
+Ever found yourself confused and lost as you read through [page](http://wiki.osdev.org/VGA_Hardware) after [page](http://www.osdever.net/FreeVGA/vga/vga.htm), [manual](http://www.mcamafia.de/pdf/ibm_vgaxga_trm2.pdf) after [manual](https://01.org/sites/default/files/documentation/intel-gfx-prm-osrc-hsw-display_0.pdf), trying to decipher how the original IBM Video Graphics Array worked during its prime?
+
+This project will try to be an interactive demonstration that illustrates how each VGA register setting works together to result in the documented video modes. It is also intended that this project can help test the VGA functionality of real vs emulated VGA hardware.
 
 **Status:** Work in progress. See [TODO](#todo) below.
 
@@ -10,11 +12,9 @@ After cloning this repo to your machine, you only need to have [Node.js](https:/
 
 Credits to:
 
-- [Virtual x86](https://github.com/copy/v86) to host the DOS environment,
-- [FreeDos 1.2](http://www.freedos.org/) for OS, and
-- [Open Watcom 1.9](http://www.openwatcom.org/) for the DOS compiler.
-
-FreeDos and Open Watcom are packaged within the hard disk image `res/hda-freedos.img`.
+- [Virtual x86](https://github.com/copy/v86) to host the DOS environment (`lib/libv86.js`),
+- [FreeDOS 1.2](http://www.freedos.org/) for OS (`res/hda_freedos.img`), and
+- [Open Watcom 1.9](http://www.openwatcom.org/) for the DOS compiler (within `res/hda_freedos.img`).
 
 ## Building
 
@@ -23,6 +23,11 @@ Run the following:
 ```sh
 node build.js
 ```
+
+This will create three new files in the `build` folder:
+
+- `vga.exe` will be the DOS program, while
+- `hda-vga.img` and `state-vga.bin` are the hard disk image and the emulator state files respectively, allowing you to run the program via the Virtual x86 emulator.
 
 ## TODO
 

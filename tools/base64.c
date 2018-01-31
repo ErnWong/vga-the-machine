@@ -1,3 +1,7 @@
+/*
+ * Reads a file and outputs the binary contents in base64, \n terminated
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -98,7 +102,7 @@ int main(int argc, char ** argv)
   if (argc != 2)
   {
     fprintf(stderr, "Missing or too many arguments\n");
-    fprintf(stderr, "Usage: sendbin file\n");
+    fprintf(stderr, "Usage: BASE64 [drive:][path]filename\n");
     return EXIT_FAILURE;
   }
 
