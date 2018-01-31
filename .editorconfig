@@ -1,0 +1,9 @@
+root = true
+
+# All text file needs to be utf-8 to send to emulator
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+end_of_line = lf
+insert_final_newline = true
