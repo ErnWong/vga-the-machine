@@ -8,6 +8,7 @@ const DIR_TOOLS = path.resolve('tools');
 
 const LIB_V86 = path.resolve(DIR_LIB, 'libv86.js');
 
+const GZIP_HDA_DOS = path.resolve(DIR_RES, 'hda-freedos.gz');
 const FILE_HDA_DOS = path.resolve(DIR_RES, 'hda-freedos.img');
 const FILE_STATE_CLEAN = path.resolve(DIR_RES, 'state-clean.bin');
 const FILE_BIOS = path.resolve(DIR_RES, 'seabios.bin');
@@ -19,7 +20,7 @@ const FILE_STATE_MAIN = path.resolve(DIR_BUILD, 'state-vga.bin');
 
 const RESOURCES = [
   LIB_V86,
-  FILE_HDA_DOS,
+  GZIP_HDA_DOS,
   FILE_BIOS,
   FILE_VGABIOS
 ];
@@ -31,6 +32,7 @@ module.exports = {
   DIR_RES,
   DIR_TOOLS,
   LIB_V86,
+  GZIP_HDA_DOS,
   FILE_HDA_DOS,
   FILE_STATE_CLEAN,
   FILE_BIOS,

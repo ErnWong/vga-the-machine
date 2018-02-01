@@ -1,5 +1,6 @@
 const util = require('util');
 const fs = require('fs');
+const zlib = require('zlib');
 const path = require('path');
 const V86Starter = require('./lib/libv86.js').V86Starter;
 const consts = require('./consts.js');
@@ -8,6 +9,7 @@ const writeFile = util.promisify(fs.writeFile);
 const readFile = util.promisify(fs.readFile);
 const readdir = util.promisify(fs.readdir);
 const stat = util.promisify(fs.stat);
+const gunzip = util.promisify(zlib.gunzip);
 
 const LOG_INFO = true;
 const LOG_ERROR = true;
@@ -39,6 +41,13 @@ async function build() {
     logError('The following resources required for build is missing:');
     console.log(missingResources.join('\n'));
     process.exit(1);
+  }
+
+  if (!fs.existsSync(consts.FILE_HDA_DOS)) {
+    logInfo('Unzipping hda image');
+    let hdaZipped = await readFile(consts.GZIP_HDA_DOS);
+    let hdaUnzipped = await gunzip(hdaZipped);
+    await writeFile(consts.FILE_HDA_DOS, hdaUnzipped);
   }
 
   let settings = {
