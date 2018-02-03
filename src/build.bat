@@ -1,3 +1,2 @@
 @echo off
-WCC -we -wx C:\SRC\MAIN.C
-WCL MAIN.OBJ
+SMLRCC -dosh -Wall A:\SRC\MAIN.C -o A:\MAIN.EXE

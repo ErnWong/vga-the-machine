@@ -43,16 +43,24 @@ async function build() {
     process.exit(1);
   }
 
-  if (!fs.existsSync(consts.FILE_HDA_DOS)) {
-    logInfo('Unzipping hda image');
-    let hdaZipped = await readFile(consts.GZIP_HDA_DOS);
+  if (!fs.existsSync(consts.FILE_FDA_DOS)) {
+    logInfo('Unzipping dos fda image');
+    let fdaZipped = await readFile(consts.GZIP_FDA_DOS);
+    let fdaUnzipped = await gunzip(fdaZipped);
+    await writeFile(consts.FILE_FDA_DOS, fdaUnzipped);
+  }
+
+  if (!fs.existsSync(consts.FILE_HDA_SMLRC)) {
+    logInfo('Unzipping smlrc hda image');
+    let hdaZipped = await readFile(consts.GZIP_HDA_SMLRC);
     let hdaUnzipped = await gunzip(hdaZipped);
-    await writeFile(consts.FILE_HDA_DOS, hdaUnzipped);
+    await writeFile(consts.FILE_HDA_SMLRC, hdaUnzipped);
   }
 
   let settings = {
     bios: {},
     vga_bios: {},
+    fda: {},
     hda: {},
     autostart: true,
     screen_dummy: true
@@ -61,9 +69,24 @@ async function build() {
   logInfo('Loading images');
   settings.bios.buffer = await loadAsBuffer(consts.FILE_BIOS);
   settings.vga_bios.buffer = await loadAsBuffer(consts.FILE_VGABIOS);
-  settings.hda.buffer = await loadAsBuffer(consts.FILE_HDA_DOS);
+  settings.fda.buffer = await loadAsBuffer(consts.FILE_FDA_DOS);
+  settings.hda.buffer = await loadAsBuffer(consts.FILE_HDA_SMLRC);
 
-  const isUsingState = fs.existsSync(consts.FILE_STATE_CLEAN);
+  const fdaMtimeMs = (await stat(consts.FILE_FDA_DOS)).mtimeMs;
+  const hdaMtimeMs = (await stat(consts.FILE_HDA_SMLRC)).mtimeMs;
+  let stateMtimeMs = -Infinity;
+  try {
+    stateMtimeMs = (await stat(consts.FILE_STATE_CLEAN)).mtimeMs;
+  } catch (err) {
+
+    if (err.code === 'ENOENT')
+      logInfo('Clean state file does not exist - creating...');
+    else
+      throw err;
+
+  }
+
+  const isUsingState = stateMtimeMs > Math.max(fdaMtimeMs, hdaMtimeMs);
 
   if (isUsingState) {
     settings.initial_state = {};
@@ -77,42 +100,44 @@ async function build() {
 
   if (!isUsingState) {
 
-    logInfo('Clean state file does not exist - creating...');
-
     logInfo('Waiting for boot');
-    await untilScreenText('Select from Menu');
+    await untilScreenText('Press F8 to trace or F5 to skip');
     emulator.keyboard_send_text('\n');
 
     logInfo('Waiting for shell');
-    await untilScreenText('C:\\>');
+    await untilScreenText('A:\\>');
 
     logInfo('Saving clean shell state');
     await saveState(consts.FILE_STATE_CLEAN);
 
   }
 
-  await untilScreenText('C:\\>');
+  await untilScreenText('A:\\>');
+  await sendCommand('SET PATH=%PATH%;C:\\BIND;C:\\');
+  await sendCommand('SET SMLRC=C:\\');
+  await sendCommand('SET SMLRASM=C:\\YASM.exe');
+  await sendCommand('DIR C:');
 
   logInfo('Transfering files...');
-  await transferDirectory(consts.DIR_TOOLS, 'C:\\TOOLS');
-  await transferDirectory(consts.DIR_SRC, 'C:\\SRC');
+  await transferDirectory(consts.DIR_TOOLS, 'A:\\TOOLS');
+  await transferDirectory(consts.DIR_SRC, 'A:\\SRC');
 
   logInfo('Compiling tools');
-  await sendCommand('C:\\TOOLS\\BUILD.BAT');
+  await sendCommand('A:\\TOOLS\\BUILD.BAT');
   await testErrorCode();
 
   logInfo('Compiling program');
-  await sendCommand('C:\\SRC\\BUILD.BAT');
+  await sendCommand('A:\\SRC\\BUILD.BAT');
   await testErrorCode();
 
   logInfo('Retrieving binaries');
-  await retrieveBinaryFile('C:\\MAIN.EXE', consts.FILE_EXE_MAIN);
+  await retrieveBinaryFile('A:\\MAIN.EXE', consts.FILE_EXE_MAIN);
 
   logInfo('Running program');
   await sendCommand('MAIN');
 
-  logInfo('Saving hda image');
-  await writeFile(consts.FILE_HDA_MAIN, new Uint8Array(settings.hda.buffer));
+  logInfo('Saving fda image');
+  await saveDisk(consts.FILE_FDA_MAIN);
 
   logInfo('Saving in-program state');
   await saveState(consts.FILE_STATE_MAIN);
@@ -123,6 +148,10 @@ async function build() {
   async function saveState(destination) {
     const state = await util.promisify(emulator.save_state.bind(emulator))();
     await writeFile(destination, new Uint8Array(state));
+  }
+
+  async function saveDisk(destination) {
+    await writeFile(destination, new Uint8Array(settings.fda.buffer));
   }
 
   function listenForUserCommands() {
@@ -170,7 +199,7 @@ async function build() {
 
   async function testErrorCode() {
 
-    await untilScreenText('C:\\>    ');
+    await untilScreenText('A:\\>    ');
 
     await new Promise((resolve, reject) => {
       let output = '';
@@ -187,7 +216,10 @@ async function build() {
 
             logError(` - Error level: ${output}`);
             drawScreen();
-            reject();
+
+            logInfo('Saving current fda state');
+            saveDisk(consts.FILE_FDA_FAILED)
+              .then(reject);
 
           } else {
 
@@ -212,6 +244,12 @@ async function build() {
   function drawScreen() {
 
     const screen = emulator.screen_adapter.get_text_screen();
+
+    if (screen.length < 1) {
+      logInfo('Screen has not be initialized yet - nothing to draw');
+      return;
+    }
+
     const cols = screen[0].length;
 
     const title = 'S C R E E N';
@@ -257,13 +295,13 @@ async function build() {
   async function sendCommand(command) {
 
     logInfo(`Command: ${command}`);
-    await untilScreenText(`C:\\>    `);
+    await untilScreenText(`A:\\>    `);
     let sent = '';
 
     for (let c of command) {
       emulator.keyboard_send_text(c);
       sent += c;
-      await untilScreenText(`C:\\>${sent}    `);
+      await untilScreenText(`A:\\>${sent}    `);
     }
 
     emulator.keyboard_send_text('\n');
@@ -273,7 +311,7 @@ async function build() {
   async function transferDirectory(dir, dest) {
 
     await sendCommand(`mkdir ${dest}`);
-    await untilScreenText(`C:\\>    `);
+    await untilScreenText(`A:\\>    `);
 
     const files = await readdir(dir);
 
@@ -306,7 +344,7 @@ async function build() {
     // Send EOF
     emulator.serial0_send('\x1A');
 
-    await untilScreenText(`C:\\>    `);
+    await untilScreenText(`A:\\>    `);
 
   }
 
