@@ -3,8 +3,7 @@
 /build/*
 !/build/README.markdown
 /res/state-clean.bin
-/res/fda-freedos.img
-/res/hda-smlrc.img
+/res/hda-freedos.img
 
 # Created by https://www.gitignore.io/api/vim,node,linux,macos,windows
 

@@ -14,9 +14,8 @@ After cloning this repo to your machine, you only need to have [Node.js](https:/
 Credits to:
 
 - [Virtual x86](https://github.com/copy/v86) to host the DOS environment (`lib/libv86.js`),
-- [FreeDOS 1.2](http://www.freedos.org/) for OS (`res/fda_freedos.img`),
-- [Smaller C](https://github.com/alexfru/SmallerC) for the DOS compiler (within `res/hda_smlrc.img`), and
-- [YASM](http://yasm.tortall.net/) for the assembler (also within `res/hda_smlrc.img`).
+- [FreeDOS 1.2](http://www.freedos.org/) for OS (`res/hda_freedos.img`), and
+- [Open Watcom 1.9](http://www.openwatcom.org/) for the DOS compiler (within `res/hda_freedos.img`).
 
 ## Building
 
