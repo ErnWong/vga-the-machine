@@ -108,14 +108,16 @@ async function build() {
   logInfo('Retrieving binaries');
   await retrieveBinaryFile('C:\\MAIN.EXE', consts.FILE_EXE_MAIN);
 
-  logInfo('Running program');
+  logInfo('Starting program');
   await sendCommand('MAIN');
-
-  logInfo('Saving hda image');
-  await writeFile(consts.FILE_HDA_MAIN, new Uint8Array(settings.hda.buffer));
+  await untilScreenMode(true);
+  emulator.stop();
 
   logInfo('Saving in-program state');
   await saveState(consts.FILE_STATE_MAIN);
+
+  logInfo('Saving hda image');
+  await writeFile(consts.FILE_HDA_MAIN, new Uint8Array(settings.hda.buffer));
 
   logSuccess('Done!');
   process.exit();
@@ -250,6 +252,21 @@ async function build() {
       }
       emulator.add_listener('screen-put-char', handleChar);
       handleChar();
+    });
+
+  }
+
+  function untilScreenMode(isGraphical) {
+
+    return new Promise((resolve, reject) => {
+      emulator.add_listener('screen-set-mode', function handleModeSet(modeIsGraphical) {
+
+        if (isGraphical === modeIsGraphical) {
+          emulator.remove_listener('screen-set-mode', handleModeSet);
+          resolve();
+        }
+
+      });
     });
 
   }
