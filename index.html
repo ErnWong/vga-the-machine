@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>VGA The Machine</title>
+    <script src="lib/libv86.js"></script>
+    <link rel="stylesheet" type="text/css" href="assets/main.css" />
+    <link rel="stylesheet" type="text/css" href="assets/fonts.css" />
+  </head>
+  <body>
+    <div id="screen">
+      <div></div>
+      <canvas></canvas>
+    </div>
+    <script>
+      var screen = document.getElementById('screen');
+
+      var emulator = new V86Starter({
+        screen_container: screen,
+        bios: {
+          url: 'res/seabios.bin'
+        },
+        vga_bios: {
+          url: 'res/vgabios.bin'
+        },
+        hda: {
+          url: 'build/hda-vga.img'
+        },
+        initial_state: {
+          url: 'build/state-vga.bin'
+        },
+        autostart: true
+      });
+
+      emulator.add_listener('screen-set-size-text', function (size) {
+        screen.style.width = (size[0] * 9) + 'px';
+        screen.style.height = (size[1] * 16) + 'px';
+      });
+
+      emulator.add_listener('screen-set-size-graphical', function (size) {
+        screen.style.width = size[0] + 'px';
+        screen.style.height = size[1] + 'px';
+      });
+    </script>
+  </body>
+</html>

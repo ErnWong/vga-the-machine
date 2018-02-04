@@ -1,0 +1,7 @@
+@font-face {
+    font-family: "PxPlus IBM VGA9 Web";
+    src: url("pxplus_ibm_vga9-webfont.woff2") format("woff2"),
+         url("pxplus_ibm_vga9-webfont.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
